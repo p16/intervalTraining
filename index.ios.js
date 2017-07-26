@@ -1,29 +1,17 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
-
 import React, { Component } from 'react';
 import {
   TouchableHighlight,
+  TouchableWithoutFeedback,
   Vibration,
   AppRegistry,
   StyleSheet,
   Text,
   TextInput,
-  View
+  View,
+  Keyboard
 } from 'react-native';
 
-/*
-<TouchableHighlight
-  style={styles.wrapper}
-  onPress={() => Vibration.vibrate()}>
-  <View style={styles.button}>
-    <Text>Vibrate</Text>
-  </View>
-</TouchableHighlight>
-*/
+import KeepAwake from 'react-native-keep-awake';
 
 export default class intervalTraining extends Component {
   constructor (props) {
@@ -37,6 +25,8 @@ export default class intervalTraining extends Component {
   }
 
   start () {
+    KeepAwake.activate()
+
     let {
       intervals,
       intervalTime,
@@ -66,6 +56,7 @@ export default class intervalTraining extends Component {
     this.setState({
       passingTime: totalTime - time
     })
+    Vibration.vibrate([200, 100, 200, 100, 200])
 
     const interval = setInterval(() => {
       time++
@@ -86,6 +77,7 @@ export default class intervalTraining extends Component {
   }
 
   stop () {
+    KeepAwake.deactivate()
     clearInterval(this.state.interval)
     this.setState({
       passingTime: undefined
@@ -93,16 +85,18 @@ export default class intervalTraining extends Component {
   }
 
   formatPassingTime (totalSeconds) {
-    const minutes = Math.floor(totalSeconds/60)
-    const seconds = totalSeconds - (minutes * 60)
+    const totalMinutes = Math.floor(totalSeconds/60)
+    const hours = Math.floor(totalMinutes/60)
+    const minutes = totalMinutes - (hours * 60)
+    const seconds = totalSeconds - (totalMinutes * 60)
 
-    return `${minutes < 10 ? '0'+minutes : minutes}:${seconds < 10 ? '0'+seconds : seconds}`
+    return `${hours < 10 ? '0'+hours : hours}:${minutes < 10 ? '0'+minutes : minutes}:${seconds < 10 ? '0'+seconds : seconds}`
   }
 
   renderPassingTime () {
     if (this.state.passingTime !== undefined) {
       return (
-        <View>
+        <View style={styles.passingTimeContainer}>
           <Text style={styles.passingTime}>
             {this.formatPassingTime(this.state.passingTime)}
             </Text>
@@ -121,21 +115,21 @@ export default class intervalTraining extends Component {
     if (this.state.passingTime === undefined) {
       return (
         <View style={styles.inputs}>
+          <Text>Number of intervals</Text>
           <TextInput
             style={styles.input}
-            placeholder="number of intervals"
             onChangeText={(intervals) => this.setState({intervals})}
             value={this.state.intervals}
           />
+          <Text>How long each interval?</Text>
           <TextInput
             style={styles.input}
-            placeholder="how long each interval?"
             onChangeText={(intervalTime) => this.setState({intervalTime})}
             value={this.state.intervalTime}
           />
+          <Text>How long between intervals?</Text>
           <TextInput
             style={styles.input}
-            placeholder="how long the break between intervals?"
             onChangeText={(breakTime) => this.setState({breakTime})}
             value={this.state.breakTime}
           />
@@ -152,10 +146,12 @@ export default class intervalTraining extends Component {
 
   render() {
     return (
-      <View style={styles.container}>
-        {this.renderPassingTime()}
-        {this.renderInputs()}
-      </View>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
+          {this.renderPassingTime()}
+          {this.renderInputs()}
+        </View>
+      </TouchableWithoutFeedback>
     );
   }
 }
@@ -184,8 +180,8 @@ const styles = StyleSheet.create({
     width: 320,
     padding: 10,
     borderRadius: 5,
-    borderColor: '#004d1a',
-    backgroundColor: '#00e64d'
+    borderColor: '#008975',
+    backgroundColor: '#00AA8D'
   },
   buttonStop: {
     width: 320,
@@ -195,11 +191,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffad33'
   },
   buttonText: {
-    fontSize: 20,
+    color: '#ffffff',
+    fontSize: 30,
     textAlign: 'center'
   },
+  passingTimeContainer: {
+    flex: 1,
+    justifyContent: 'space-around',
+    alignItems: 'center'
+  },
   passingTime: {
-    fontSize: 25,
+    fontSize: 40,
     textAlign: 'center',
     padding: 20
   }
