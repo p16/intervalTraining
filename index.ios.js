@@ -22,6 +22,7 @@ export default class intervalTraining extends Component {
     this.renderInputs = this.renderInputs.bind(this)
     this.stop = this.stop.bind(this)
     this.start = this.start.bind(this)
+    this.formatTimeSoFar = this.formatTimeSoFar.bind(this)
   }
 
   start () {
@@ -54,7 +55,7 @@ export default class intervalTraining extends Component {
 
     let time = 0
     this.setState({
-      passingTime: totalTime - time
+      passingTime: totalTime
     })
     Vibration.vibrate([200, 100, 200, 100, 200])
 
@@ -84,6 +85,23 @@ export default class intervalTraining extends Component {
     })
   }
 
+  formatTimeSoFar () {
+    let {
+      intervals,
+      intervalTime,
+      breakTime,
+    } = this.state
+
+    intervals = parseInt(intervals) || 0
+    intervalTime = parseInt(intervalTime) * 60 || 0
+    breakTime = parseInt(breakTime) * 60 || 0
+
+    let chunkTime = intervalTime + breakTime
+    let totalTime = intervals * chunkTime
+
+    return this.formatPassingTime(totalTime)
+  }
+
   formatPassingTime (totalSeconds) {
     const totalMinutes = Math.floor(totalSeconds/60)
     const hours = Math.floor(totalMinutes/60)
@@ -99,7 +117,7 @@ export default class intervalTraining extends Component {
         <View style={styles.passingTimeContainer}>
           <Text style={styles.passingTime}>
             {this.formatPassingTime(this.state.passingTime)}
-            </Text>
+          </Text>
           <TouchableHighlight
             onPress={this.stop}>
             <View style={styles.buttonStop}>
@@ -115,6 +133,11 @@ export default class intervalTraining extends Component {
     if (this.state.passingTime === undefined) {
       return (
         <View style={styles.inputs}>
+
+          <Text style={styles.timeSoFar}>
+            {this.formatTimeSoFar()}
+          </Text>
+
           <Text>Number of intervals</Text>
           <TextInput
             style={styles.input}
@@ -204,6 +227,11 @@ const styles = StyleSheet.create({
     fontSize: 40,
     textAlign: 'center',
     padding: 20
+  },
+  timeSoFar: {
+    fontSize: 30,
+    textAlign: 'center',
+    paddingBottom: 20
   }
 });
 
